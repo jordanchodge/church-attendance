@@ -1,0 +1,59 @@
+canvas.dataChart {
+  padding: 0;
+  margin: auto;
+  display: block;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Display Page CSS*/
+.display-message{
+  font-weight:bold;
+  position:fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -25px;
+  margin-left: -100px;
+}
+
+.month-buttons{
+  padding:5px 5px 5px 5px;
+}
+
+/* Text input CSS */
+.numberInput {
+  width: 250px !important;
+}
+
+/* Navbar CSS */
+.navbar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.navbar li {
+  float: left;
+}
+
+.navbar li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.navbar li a:hover {
+  color: grey;
+}
+
+.buttonStyle {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
