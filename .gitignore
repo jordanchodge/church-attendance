@@ -14,6 +14,7 @@ node_modules/@firebase/analytics/dist/index.esm2017.js
 node_modules/@firebase/analytics/dist/index.esm2017.js.map
 node_modules/@firebase/analytics/dist/index.test.d.ts
 node_modules/@firebase/analytics/dist/src/constants.d.ts
+node_modules/@firebase/analytics/dist/src/errors.d.ts
 node_modules/@firebase/analytics/dist/src/factory.d.ts
 node_modules/@firebase/analytics/dist/src/functions.d.ts
 node_modules/@firebase/analytics/dist/src/functions.test.d.ts
