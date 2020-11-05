@@ -30,6 +30,3 @@ function writeInputData(){
 
     ref.set(input);
 }
-
-
-//Showing hiding months - later feature

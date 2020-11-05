@@ -1,104 +1,130 @@
-//declaring variables
-let total;
-let attendanceDate;
-let dataInput;
-let weekDate;
-let weekTotal;
-let inputDate = [];
-let monthTotalArray = [];
-let chart_labels = [];
-let dataTotal = [];
-
-const ctx = document.getElementById('attendanceTotal').getContext('2d');
-
-chart_labels = [`June`];
-monthTotalArray = [100];
-
-//config settings for chartJS 
-let config = {
-    type: 'bar',
-    data: {
-        labels: chart_labels,
-        datasets: [{
-            type: 'bar',
-            label: 'Total',
-            backgroundColor: 'rgba(0, 99, 132, 0.6)',
-            borderColor: 'rgba(0, 99, 132, 1)',
-            yAxisID: 'y-axis-0',
-            fill: false,
-            data: monthTotalArray
-        }],
-    },
-    options: {
-        responsive:true,
-        scales: {
-            xAxes: [{
-                scaleLabel: {
-                    display: true,
-                    labelString: "Date"  
-                }
-            }],
-            yAxes: [{
-                scaleLabel: {
-                    display: true,
-                    labelString: "# of Attendees",
-                    "id": "y-axis-0",
-                    position: "left"
-                },
-                ticks: {
-                    beginAtZero: true,
-                }
-            }]
-        },
-        legend: {
-            position: 'right'
-        }
-    }    
-}
-
-const attendance_chart = new Chart(ctx, config);
-
-//IDEA -default state of chart, to hide until the user picks a month
-//$(`#attendanceTotal`).hide();
-
 //pulling data from Firebase
 firebase.database().ref('/attendance/').orderByChild("serverDate").once('value').then(function(snapshot){
+    //declaring variables
+    let total;
+    let attendanceDate;
+    let weekDate;
+    let weekTotal;
+    let rightSection;
+    let leftSection;
+    let middleSection;
+    let balcony; 
+    let monthTotalArray = [];
+    let chart_labels = [];
+    let dataTotal = [];
+    let sectionTotal = [];
+
+    const ctx = document.getElementById('attendanceTotal').getContext('2d');
+
+    //clearing the data for the next month
+    function resetChart(){
+        monthTotalArray = [];
+        chart_labels = []
+    }
+
+    //disable is the initial state of the buttons - using jquery
+    //TODO: Find to only disable month buttons
+    $(`:button`).prop(`disabled`, true);
+
+    let config = {
+        type: 'bar',
+        data: {
+            labels: chart_labels,
+            datasets: [{
+                type: 'bar',
+                label: 'Total',
+                backgroundColor: 'rgba(0, 99, 132, 0.6)',
+                borderColor: 'rgba(0, 99, 132, 1)',
+                fill: false,
+                data: monthTotalArray
+            }],
+        },
+        options: {
+            responsive:true,
+            scales: {
+                xAxes: [{
+                    scaleLabel: {
+                        display: true
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "# of Attendees",
+                        position: "left"
+                    },
+                ticks: {
+                    beginAtZero: true,
+                    }
+                }]
+            },
+            legend: {
+                position: 'right'
+            }
+        }    
+    }
+    //creating the chart instance
+    const attendance_chart = new Chart(ctx, config);
+
+    //pulling data from firebase and pushing it into the dataTotal array
     snapshot.forEach(function(childSnapshot){
         let attendanceData = childSnapshot.val();
 
         attendanceDate = attendanceData.inputDate;
         total = attendanceData.total;
 
-        dataTotal.push([attendanceDate, total]);
+        leftSection = attendanceData.leftSection;
+        rightSection = attendanceData.rightSection;
+        middleSection = attendanceData.middleSection;
+        balcony = attendanceData.balcony;
+
+        dataTotal.push([attendanceDate, total, leftSection, rightSection, middleSection, balcony])
+        //dataTotal.push([attendanceDate, total]);
     });
 
-    //clearing the data for the next month
-    function resetChart(){
-        monthTotalArray = [];
-        chart_labels = [];
-    }
-
-    //IDEA - create sepearte function for displaying weekly total
-    /*function showWeeklyData() {
-        weekDate = item[0];
-        weekTotal = item[1];
-        let data = attendance_chart.config.data;
-
-        chart_labels.push(weekDate);
-        monthTotalArray.push(weekTotal);
-
-        data.datasets[0].data = monthTotalArray;
-        data.labels = chart_labels;
-
-        attendance_chart.update();
-        
-    }*/
-
-    //disable is the initial state of the buttons - using jquery
-    $(`:button`).prop(`disabled`, true);
+    //getting the current month for initial load
+    let today = new Date();
+    let currentMonth = today.toLocaleString('default', {month: 'short'});
+    
+    //getting the previous month if there's no data for the current month
+    let lastMonth = new Date();
+    lastMonth.setDate(lastMonth.getDate() - 7);
+    let previousMonth = lastMonth.toLocaleString('default', {month: 'short'});
 
     //going through and seeing if there is any data avaiable, if data is availabe then enable button
+    //also display current month value on initial load
+    //TODO: To make this more efficient 
     dataTotal.forEach(function(item){
+        if(item[0].slice(0,3) === currentMonth) {
+            //console.log(item[0] + " " + item[1]);
+
+            resetChart();
+            
+            weekDate = item[0];
+            weekTotal = item[1];
+            let data = attendance_chart.config.data;
+
+            chart_labels.push(weekDate);
+            monthTotalArray.push(weekTotal);
+    
+            data.datasets[0].data = monthTotalArray;
+            data.labels = chart_labels;
+
+            attendance_chart.update();
+        } else if (item[0].slice(0,3) === previousMonth) {
+            weekDate = item[0];
+            weekTotal = item[1];
+            let data = attendance_chart.config.data;
+
+            chart_labels.push(weekDate);
+            monthTotalArray.push(weekTotal);
+    
+            data.datasets[0].data = monthTotalArray;
+            data.labels = chart_labels;
+
+            attendance_chart.update();
+        }
+
         if(item[0].slice(0,3) == `Jun`){
             document.getElementById('june').disabled = false;
         } else if(item[0].slice(0,3) == `Jan`){
@@ -124,288 +150,20 @@ firebase.database().ref('/attendance/').orderByChild("serverDate").once('value')
         } else if(item[0].slice(0,3) == `Dec`){
             document.getElementById('december').disabled = false;
         }
-    })
+    });
 
     //Button for pulling then displaying the data
-    $("#january").click(function(){
-
+    $(":button").click(function(){
         let month = $(this).val();
 
-        dataTotal.forEach(function (item, index) {
+        resetChart();
+
+        dataTotal.forEach(function (item) {
             if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
                 
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
+                //leftSection = item[2];
 
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#february").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#march").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#april").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#may").click(function(){
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#june").click(function(){
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#july").click(function(){
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month){
-                //console.log(item[0] + " " + item[1]);
-    
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-    
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-    
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#august").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#september").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#october").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#november").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
-                
-                weekDate = item[0];
-                weekTotal = item[1];
-                let data = attendance_chart.config.data;
-
-                chart_labels.push(weekDate);
-                monthTotalArray.push(weekTotal);
-        
-                data.datasets[0].data = monthTotalArray;
-                data.labels = chart_labels;
-
-                attendance_chart.update();
-            }
-        })
-    });
-
-    $("#december").click(function(){
-
-        let month = $(this).val();
-
-        resetChart();
-
-        dataTotal.forEach(function (item, index) {
-            if(item[0].slice(0,3) == month) {
-                //console.log(item[0] + " " + item[1]);
+                //console.log(leftSection);
                 
                 weekDate = item[0];
                 weekTotal = item[1];
