@@ -30,3 +30,10 @@ function writeInputData(){
 
     ref.set(input);
 }
+
+function RemoveDiv(){
+    
+}
+
+//disabling the month buttons
+$(`button.month-btn`).prop(`disabled`, true);

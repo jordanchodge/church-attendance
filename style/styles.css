@@ -13,6 +13,11 @@ canvas.dataChart {
   padding:5px 5px 5px 5px;
 }
 
+.year-buttons{
+  
+  padding:5px 5px 5px 5px;
+}
+
 /* Text input CSS */
 .numberInput {
   width: 250px !important;
@@ -50,4 +55,27 @@ color:black;
   border: none;
   margin: 0;
   padding: 0;
+}
+
+/* Custom Card Styling */
+.card-label label, .card-label p {
+  display: inline-block;
+}
+
+.card-label label {
+  margin-right: 7%;
+}
+
+.card-title h5, .card-title button {
+  display: inline-block;
+}
+
+.custom-card-style {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+  margin:15px;
+}
+
+.stats {
+  height: 500px;
+  overflow-y: auto;
 }
