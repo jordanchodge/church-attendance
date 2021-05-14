@@ -4,10 +4,10 @@
   "description": "",
   "main": "scripts.js",
   "dependencies": {
-    "bootstrap": "^4.5.0",
-    "chart.js": "^2.9.3",
-    "firebase": "^7.14.5",
-    "jquery": "^3.5.1"
+    "bootstrap": "^4.6.0",
+    "chart.js": "^2.9.4",
+    "firebase": "^7.24.0",
+    "jquery": "^3.6.0"
   },
   "devDependencies": {},
   "scripts": {
